@@ -222,7 +222,7 @@ runcmd:
   # Download Workshop
   - export WSVERSION=${wsversion}
   - 'export WSARCHIVE=$([ "$WSVERSION" = "main" ] && echo "main" || echo "v$WSVERSION")'
-  - curl -s -OL https://github.com/splunk/observability-workshop/archive/$WSARCHIVE.zip
+  - curl -s -OL https://github.com/mmehta64/controlled-env-o11y/archive/$WSARCHIVE.zip
   - unzip -qq $WSARCHIVE.zip -d /home/splunk/
   - mkdir /home/splunk/workshop
   - mv /home/splunk/observability-workshop-$WSVERSION/workshop/* /home/splunk/workshop

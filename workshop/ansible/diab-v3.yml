@@ -11,6 +11,7 @@
         instance: "{{ lookup('env','INSTANCE') }}"
         hec_url: "{{ lookup('env','HEC_URL') }}"
         hec_token: "{{ lookup('env','HEC_TOKEN') }}"
+        index: "{{ lookup('env','INDEX') }}"
 
   tasks:
     - name: Configure Demo-in-a-Box
@@ -170,7 +171,7 @@
         uri:
           url: "http://localhost:8082/saveConfig"
           method: POST
-          body: "realm={{ realm }}&ingest_token={{ ingest_token }}&rum_token={{ rum_token }}&hec_url={{ hec_url}}&hec_token={{ hec_token }}&splunk_index=splunk4rookies-workshop&instance={{ instance }}"
+          body: "realm={{ realm }}&ingest_token={{ ingest_token }}&rum_token={{ rum_token }}&hec_url={{ hec_url}}&hec_token={{ hec_token }}&splunk_index={{ index }}&instance={{ instance }}"
           status_code: [ 200, 201 ]
           timeout: 30
         register: splunk_api

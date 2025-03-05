@@ -100,7 +100,7 @@ helm install splunk-otel-collector --version 0.111.0 \
 --set="environment=$INSTANCE-workshop" \
 --set="splunkPlatform.endpoint=$HEC_URL" \
 --set="splunkPlatform.token=$HEC_TOKEN" \
---set="splunkPlatform.index=splunk4rookies-workshop" \
+--set="splunkPlatform.index=$INDEX" \
 splunk-otel-collector-chart/splunk-otel-collector \
 -f $MY_OTEL_VALUES_PATH
 
