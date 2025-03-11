@@ -225,9 +225,9 @@ runcmd:
   - curl -s -OL https://github.com/mmehta64/controlled-env-o11y/archive/$WSARCHIVE.zip
   - unzip -qq $WSARCHIVE.zip -d /home/splunk/
   - mkdir /home/splunk/workshop
-  - mv /home/splunk/observability-workshop-$WSVERSION/workshop/* /home/splunk/workshop
+  - mv /home/splunk/controlled-env-o11y-$WSVERSION/workshop/* /home/splunk/workshop
   - mv /home/splunk/workshop/ansible/diab-v3.yml /home/splunk
-  - rm -rf /home/splunk/observability-workshop-$WSVERSION
+  - rm -rf /home/splunk/controlled-env-o11y-$WSVERSION
   - rm -rf /home/splunk/workshop/aws /home/splunk/workshop/cloud-init /home/splunk/workshop/ansible
   - mv /home/splunk/workshop/k3s/demo-in-a-box.zip /home/splunk
 
