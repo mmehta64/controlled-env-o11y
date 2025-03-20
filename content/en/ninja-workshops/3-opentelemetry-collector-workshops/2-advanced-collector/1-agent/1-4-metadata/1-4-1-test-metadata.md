@@ -14,7 +14,7 @@ weight: 1
 If everything is set up correctly, the last line of the output should confirm the collector is running:
 
 ```text
-  2025-01-13T12:43:51.747+0100 info service@v0.116.0/service.go:261 Everything is ready. Begin running and processing data.
+  2025-01-13T12:43:51.747+0100 info service@v0.120.0/service.go:261 Everything is ready. Begin running and processing data.
 ```
 
 **Send a Trace**: From the **Spans terminal** window (making sure you are in the `1-agent` directory), send spans again with the `loadgen` binary to create a new `agent.out`:
@@ -175,6 +175,8 @@ These values are automatically added based on your device by the processors conf
 
 {{% /tab %}}
 {{% /tabs %}}
-{{% /notice %}}
 
-Stop the `agent` and `loadgen` processes by using `Ctrl-C` in the respective terminal windows.
+> [!IMPORTANT]
+> Stop the `agent` and `loadgen` processes by using `Ctrl-C` in the respective terminal windows.
+
+{{% /notice %}}

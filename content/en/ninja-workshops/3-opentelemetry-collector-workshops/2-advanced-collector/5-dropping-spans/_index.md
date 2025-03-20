@@ -2,7 +2,7 @@
 title: 5. Dropping Spans
 linkTitle: 5. Dropping Spans
 time: 10 minutes
-weight: 5
+weight: 7
 ---
 
 In this section, we will explore how to use the [**Filter Processor**](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md) to selectively drop spans based on certain conditions.
@@ -12,16 +12,17 @@ Specifically, we will drop traces based on the span name, which is commonly used
 {{% notice title="Exercise" style="green" icon="running" %}}
 
 - Inside the `[WORKSHOP]` directory, create a new subdirectory named `5-dropping-spans`.
-- Next, copy all contents from the `4-resilience` directory into `5-dropping-spans`.
-- Change **all** terminal windows to the `[WORKSHOP]/5-dropping-spans` directory.
+- Next, copy `*.yaml` from the `4-resilience` directory into `5-dropping-spans`.
+
+> [!IMPORTANT]
+> **Change _ALL_ terminal windows to the `[WORKSHOP]/5-dropping-spans` directory.**
 
 Your updated directory structure will now look like this:
 
 ```text { title="Updated Directory Structure" }
-[WORKSHOP]
-└── 5-dropping-spans
-    ├── agent.yaml
-    └── gateway.yaml
+.
+├── agent.yaml
+└── gateway.yaml
 ```
 
 {{% /notice %}}

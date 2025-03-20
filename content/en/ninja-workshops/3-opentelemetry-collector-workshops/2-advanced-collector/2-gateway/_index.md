@@ -2,7 +2,7 @@
 title: 2. Gateway Configuration
 linkTitle: 2. Gateway Setup
 time: 10 minutes
-weight: 2
+weight: 4
 ---
 
 The OpenTelemetry Gateway is designed to receive, process, and export telemetry data. It acts as an intermediary between telemetry sources (e.g. applications, services) and backends (e.g., observability platforms like Prometheus, Jaeger, or Splunk Observability Cloud).
@@ -11,9 +11,12 @@ The gateway is useful because it centralizes telemetry data collection, enabling
 
 {{% notice title="Exercise" style="green" icon="running" %}}
 
-- Inside the `[WORKSHOP]` directory, create a new subdirectory named `2-gateway`.
-- Change **all** terminal windows to the `[WORKSHOP]/2-gateway` directory.
-- Next, copy `agent.yaml` from the `1-agent` directory into `2-gateway`.
+- In the **Gateway terminal** window, change into the `[WORKSHOP]` directory and create a new subdirectory named `2-gateway`.
+
+> [!IMPORTANT]
+> **Change _ALL_ terminal windows to the `[WORKSHOP]/2-gateway` directory.**
+
+- Back in the **Gateway terminal** window, copy `agent.yaml` from the `1-agent` directory into `2-gateway`.
 - Create a file called `gateway.yaml` and add the following initial configuration:
 
 ```yaml { title="gateway.yaml" }
@@ -44,6 +47,8 @@ exporters:                        # List of exporters
     path: "./gateway-logs.out"    # Path for OTLP JSON output
     append: false                 # Overwrite the file each time
 
+connectors:
+
 processors:                       # List of processors
   memory_limiter:                 # Limits memory usage
     check_interval: 2s            # Memory check interval
@@ -61,6 +66,9 @@ processors:                       # List of processors
 ### Activation Section  ###
 ###########################
 service:                          # Service configuration
+  telemetry:
+    metrics:
+      level: none                 # Disable metrics
   extensions: [health_check]      # Enabled extensions
   pipelines:                      # Configured pipelines
     traces:                       # Traces pipeline
@@ -95,11 +103,13 @@ service:                          # Service configuration
       - file/logs
 ```
 
+> [!NOTE]
+> When the `gateway` is started it will generate three files: `gateway-traces.out`, `gateway-metrics.out`, and `gateway-logs.out`. These files will eventually contain the telemetry data received by the gateway.
+
 ```text { title="Updated Directory Structure" }
-[WORKSHOP]
-└── 2-gateway
-    └── agent.yaml
-    └── gateway.yaml
+.
+├── agent.yaml
+└── gateway.yaml
 ```
 
 {{% /notice %}}

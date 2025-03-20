@@ -21,97 +21,53 @@ weight: 3
 <snip>
 NumberDataPoints #37
 Data point attributes:
-    -> cpu: Str(cpu9)
+    -> cpu: Str(cpu0)
     -> state: Str(system)
 StartTimestamp: 2024-12-09 14:18:28 +0000 UTC
 Timestamp: 2025-01-15 15:27:51.319526 +0000 UTC
 Value: 9637.660000
 ```
 
-At this stage, the `agent` continues to collect **CPU** metrics once per hour or upon each restart and sends them to the gateway. The **OpenTelemetry Collector**, running in `gateway` mode, processes these metrics and exports them to a file named `./gateway-metrics.out`. This file stores the exported metrics as part of the pipeline service.  
+At this stage, the `agent` continues to collect **CPU** metrics once per hour or upon each restart and sends them to the gateway.
 
-**Verify Data arrived at Gateway**:
+The `gateway` processes these metrics and exports them to a file named `./gateway-metrics.out`. This file stores the exported metrics as part of the pipeline service.  
 
-1. Open the newly created `gateway-metrics.out` file.
-2. Check that it contains **CPU** metrics.
-3. The Metrics should include details similar to those shown below (We're only displaying the `resourceMetrics` section and the first set of **CPU** metrics):
+**Verify Data arrived at Gateway**: To confirm that CPU metrics, specifically for `cpu0`, have successfully reached the gateway, we’ll inspect the `gateway-metrics.out` file using the `jq` command.
+
+The following command filters and extracts the `system.cpu.time` metric, focusing on `cpu0`. It displays the metric’s state (e.g., `user`, `system`, `idle`, `interrupt`) along with the corresponding values.
+
+Run the command below in the **Tests terminal** to check the `system.cpu.time` metric:
 
 {{% tabs %}}
-{{% tab title="cat ./gateway-metrics.out" %}}
+{{% tab title="Check CPU Metrics" %}}
 
-```json
-{"resourceMetrics":[{"resource":{"attributes":[{"key":"host.name","value":{"stringValue":"YOUR_HOST_NAME"}},{"key":"os.type","value":{"stringValue":"YOUR_OS"}},{"key":"otelcol.service.mode","value":{"stringValue":"gateway"}}]},"scopeMetrics":[{"scope":{"name":"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper","version":"v0.116.0"},"metrics":[{"name":"system.cpu.time","description":"Total seconds each logical CPU spent on each mode.","unit":"s","sum":{"dataPoints":[{"attributes":[{"key":"cpu","value":{"stringValue":"cpu0"}},{"key":"state","value":{"stringValue":"user"}}],"startTimeUnixNano":"1733753908000000000","timeUnixNano":"1737133726158376000","asDouble":1168005.59}]}}]}]}]}
+```bash
+jq '.resourceMetrics[].scopeMetrics[].metrics[] | select(.name == "system.cpu.time") | .sum.dataPoints[] | select(.attributes[0].value.stringValue == "cpu0") | {cpu: .attributes[0].value.stringValue, state: .attributes[1].value.stringValue, value: .asDouble}' gateway-metrics.out
 ```
 
 {{% /tab %}}
-{{% tab title="cat ./gateway-metrics.out | jq" %}}
+{{% tab title="Example Output" %}}
 
 ```json
 {
-  "resourceMetrics": [
-    {
-      "resource": {
-        "attributes": [
-          {
-            "key": "host.name",
-            "value": {
-              "stringValue": "YOUR_HOST_NAME"
-            }
-          },
-          {
-            "key": "os.type",
-            "value": {
-              "stringValue": "YOUR_OS"
-            }
-          },
-          {
-            "key": "otelcol.service.mode",
-            "value": {
-              "stringValue": "gateway"
-            }
-          }
-        ]
-      },
-      "scopeMetrics": [
-        {
-          "scope": {
-            "name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper",
-            "version": "v0.116.0"
-          },
-          "metrics": [
-            {
-              "name": "system.cpu.time",
-              "description": "Total seconds each logical CPU spent on each mode.",
-              "unit": "s",
-              "sum": {
-                "dataPoints": [
-                  {
-                    "attributes": [
-                      {
-                        "key": "cpu",
-                        "value": {
-                          "stringValue": "cpu0"
-                        }
-                      },
-                      {
-                        "key": "state",
-                        "value": {
-                          "stringValue": "user"
-                        }
-                      }
-                    ],
-                    "startTimeUnixNano": "1733753908000000000",
-                    "timeUnixNano": "1737133726158376000",
-                    "asDouble": 1168005.59
-                  },
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "cpu": "cpu0",
+  "state": "user",
+  "value": 123407.02
+}
+{
+  "cpu": "cpu0",
+  "state": "system",
+  "value": 64866.6
+}
+{
+  "cpu": "cpu0",
+  "state": "idle",
+  "value": 216427.87
+}
+{
+  "cpu": "cpu0",
+  "state": "interrupt",
+  "value": 0
 }
 ```
 

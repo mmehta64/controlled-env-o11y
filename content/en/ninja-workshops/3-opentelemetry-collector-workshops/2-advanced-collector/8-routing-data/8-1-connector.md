@@ -11,16 +11,15 @@ In this exercise, you will configure the **Routing Connector** in the `gateway.y
 In OpenTelemetry configuration files, `connectors` have their own dedicated section, similar to receivers and processors.
 
 **Add the `routing` connector**:
-In the **Gateway terminal** window edit `gateway.yaml` and add the following below the `receivers:` section and above the `processors:` section:
+In the **Gateway terminal** window edit `gateway.yaml` and add the following below the `connectors:` section:
 
 ```yaml
-connectors:
   routing:
     default_pipelines: [traces/standard] # Default pipeline if no rule matches
     error_mode: ignore                   # Ignore errors in routing
     table:                               # Define routing rules
       # Routes spans to a target pipeline if the resourceSpan attribute matches the rule
-      - statement: route() where attributes["deployment.environment"] == "security_applications"
+      - statement: route() where attributes["deployment.environment"] == "security-applications"
         pipelines: [traces/security]     # Target pipeline 
 ```
 

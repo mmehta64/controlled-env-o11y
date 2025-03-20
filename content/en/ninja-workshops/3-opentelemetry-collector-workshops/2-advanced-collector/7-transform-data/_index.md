@@ -2,7 +2,7 @@
 title: 7. Transform Data
 linkTitle: 7. Transform Data
 time: 10 minutes
-weight: 7
+weight: 9
 ---
 
 The [**Transform Processor**](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) lets you modify telemetry data—logs, metrics, and traces—as it flows through the pipeline. Using the **OpenTelemetry Transformation Language (OTTL)**, you can filter, enrich, and transform data on the fly without touching your application code.
@@ -17,9 +17,6 @@ You may have noticed that in previous logs, fields like `SeverityText` and `Seve
 
 ```text
 <snip>
-LogRecord #0
-ObservedTimestamp: 2025-01-31 21:49:29.924017 +0000 UTC
-Timestamp: 1970-01-01 00:00:00 +0000 UTC
 SeverityText: 
 SeverityNumber: Unspecified(0)
 Body: Str(2025-01-31 15:49:29 [WARN] - Do or do not, there is no try.)
@@ -30,17 +27,18 @@ Logs often contain structured data encoded as JSON within the log body. Extracti
 
 {{% notice title="Exercise" style="green" icon="running" %}}
 
-- Inside the `[WORKSHOP]` directory, create a new subdirectory named `7-transform`.
-- Next, copy `*.yaml` from the `6-sensitve-data` directory into `7-transform`.
-- Change **all** terminal windows to the `[WORKSHOP]/7-transform` directory.
+- Inside the `[WORKSHOP]` directory, create a new subdirectory named `7-transform-data`.
+- Next, copy `*.yaml` from the `6-sensitve-data` directory into `7-transform-data`.
+
+> [!IMPORTANT]
+> **Change _ALL_ terminal windows to the `[WORKSHOP]/7-transform-data` directory.**
 
 Your updated directory structure will now look like this:
 
 ```text { title="Updated Directory Structure" }
-WORKSHOP
-└── 7-transform-data
-    ├── agent.yaml
-    └── gateway.yaml
+.
+├── agent.yaml
+└── gateway.yaml
 ```
 
 {{% /notice %}}

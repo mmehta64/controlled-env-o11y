@@ -23,50 +23,64 @@ Attributes:
 
 {{% notice title="Exercise" style="green" icon="running" %}}
 
-Switch to your **Agent terminal** window. Navigate to the `[WORKSHOP]/6-sensitive-data` directory and open the `agent.yaml` file in your editor.
+Switch to your **Agent terminal** window and open the `agent.yaml` file in your editor. We’ll add two processors to enhance the security and privacy of your telemetry data: the Attributes Processor and the Redaction Processor.
 
-**Add an `attributes` Processor**: The [**Attributes Processor**](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/attributesprocessor) allows you to update, delete, or hash specific attributes (tags) within spans.  
-We'll **update** the `user.phone_number`, **hash** the `user.email`, and **delete** the `user.account_password`:
+**Add an `attributes` Processor**: The [**Attributes Processor**](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/attributesprocessor) allows you to modify span attributes (tags) by updating, deleting, or hashing their values. This is particularly useful for obfuscating sensitive information before it is exported.
+
+In this step, we’ll:
+
+1. **Update** the `user.phone_number` attribute to a static value `("UNKNOWN NUMBER")`.
+2. **Hash** the `user.email` attribute to ensure the original email is not exposed.
+3. **Delete** the `user.password` attribute to remove it entirely from the span.
 
 ```yaml
-  attributes/update:               # Processor Type/Name
-    actions:                       # List of actions
-      - key: user.phone_number     # Target key
-        action: update             # Replace value with "UNKNOWN NUMBER"
-        value: "UNKNOWN NUMBER"
-      - key: user.email            # Hash the email value
-        action: hash               
-      - key: user.account_password # Remove the password
-        action: delete
+  attributes/update:
+    actions:                           # Actions
+      - key: user.phone_number         # Target key
+        action: update                 # Update action
+        value: "UNKNOWN NUMBER"        # New value
+      - key: user.email                # Target key
+        action: hash                   # Hash the email value
+      - key: user.password             # Target key
+        action: delete                 # Delete the password
   ```
 
-**Add a `redaction` Processor**: [**The Redaction Processor**](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/redactionprocessor) will detect and redact sensitive data values based on predefined patterns. We'll block credit card numbers using regular expressions.
+**Add a `redaction` Processor**: The [**The Redaction Processor**](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/redactionprocessor) detects and redacts sensitive data in span attributes based on predefined patterns, such as credit card numbers or other personally identifiable information (PII).
+
+In this step:
+
+- We set `allow_all_keys: true` to ensure all attributes are processed (if set to `false`, only explicitly allowed keys are retained).
+
+- We define blocked_values with regular expressions to detect and redact **Visa** and **MasterCard** credit card numbers.
+
+- The `summary: debug` option logs detailed information about the redaction process for debugging purposes.
 
 ```yaml
-  redaction/redact:               # Processor Type/Name
-    allow_all_keys: true          # If false, only allowed keys will be retained
-    blocked_values:               # List of regex patterns to hash
-      - '\b4[0-9]{3}[\s-]?[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b'  # Visa card
+  redaction/redact:
+    allow_all_keys: true               # If false, only allowed keys will be retained
+    blocked_values:                    # List of regex patterns to block
+      - '\b4[0-9]{3}[\s-]?[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b'       # Visa
       - '\b5[1-5][0-9]{2}[\s-]?[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b'  # MasterCard
-    summary: debug  # Show debug details about redaction
+    summary: debug                     # Show debug details about redaction
 ```
 
-**Update the `traces` Pipeline**: Integrate both processors into the `traces` pipeline. Make sure that you comment out the redaction processor at first: (We will enable it later)
+**Update the `traces` Pipeline**: Integrate both processors into the `traces` pipeline. Make sure that you comment out the redaction processor at first (we will enable it later in a separate exercise):
 
 ```yaml
     traces:
       receivers:
-      - otlp                      # OTLP Receiver
+      - otlp
       processors:
-      - memory_limiter            # Manage memory usage
-      - attributes/update         # Update, hash, and remove attributes
-      #- redaction/redact          # Redact sensitive fields using regex
-      - resourcedetection         # Add system attributes
-      - resource/add_mode         # Add metadata about collector mode
-      - batch                     # Batch Processor, groups data before send
+      - memory_limiter
+      - attributes/update              # Update, hash, and remove attributes
+      #- redaction/redact              # Redact sensitive fields using regex
+      - resourcedetection
+      - resource/add_mode
+      - batch
       exporters:
-      - debug                     # Debug Exporter
-      - otlphttp                  # OTLP/HTTP EXporter used by Splunk O11Y 
+      - debug
+      - file
+      - otlphttp
 ```
 
 {{% /notice %}}
@@ -85,6 +99,8 @@ graph LR
       PRO6(attributes<br>fa:fa-microchip<br>update):::processor
       EXP1(otlphttp<br>fa:fa-upload):::exporter
       EXP2(&ensp;&ensp;debug&ensp;&ensp;<br>fa:fa-upload):::exporter
+      EXP3(file<br>fa:fa-upload):::exporter
+
     %% Links
     subID1:::sub-traces
     subgraph " "
@@ -96,6 +112,7 @@ graph LR
       PRO2 --> PRO3
       PRO3 --> PRO5
       PRO5 --> EXP2
+      PRO5 --> EXP3
       PRO5 --> EXP1
       end
     end

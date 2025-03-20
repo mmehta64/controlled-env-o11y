@@ -2,7 +2,7 @@
 title: 1. Agent Configuration
 linkTitle: 1. Agent Setup
 time: 10 minutes
-weight: 1
+weight: 3
 ---
 
 {{% notice title="Tip" style="primary" icon="lightbulb" %}}
@@ -12,86 +12,96 @@ We will refer to these terminals as: **Agent**, **Gateway**, **Spans** and **Log
 {{% /notice %}}
 
 {{% notice title="Exercise" style="green" icon="running" %}}
-In your `[WORKSHOP]` directory, create a subdirectory called `1-agent` and change into that directory.
 
-```bash { title="Create the 1-agent directory" }
-mkdir 1-agent && \
-cd 1-agent
-```
+1. In the **Agent terminal** window, change into the `[WORKSHOP]` directory and create a new subdirectory named `1-agent`.
 
-In the `1-agent` directory, create a file named `agent.yaml`. This file will define the basic structure of an OpenTelemetry Collector configuration.
+    ```bash
+    mkdir 1-agent && \
+    cd 1-agent
+    ```
 
-Copy and paste the following initial configuration into `agent.yaml`:
+2. Create a file named `agent.yaml`. This file will define the basic structure of an OpenTelemetry Collector configuration.
 
-```yaml { title="agent.yaml" }
-###########################        This section holds all the
-## Configuration section ##        configurations that can be 
-###########################        used in this OpenTelemetry Collector
-extensions:                       # Array of Extensions
-  health_check:                   # Configures the health check extension
-    endpoint: 0.0.0.0:13133       # Endpoint to collect health check data
+3. Copy and paste the following initial configuration into `agent.yaml`:
 
-receivers:                        # Array of Receivers
-  hostmetrics:                    # Receiver Type
-    collection_interval: 3600s    # Scrape metrics every hour
-    scrapers:                     # Array of hostmetric scrapers
-      cpu:                        # Scraper for cpu metrics
-  otlp:                           # Receiver Type
-    protocols:                    # List of Protocols used 
-      http:                       # HTTP Protocol
-        endpoint: "0.0.0.0:4318"  # Endpoint for incoming telemetry data
+    ```yaml
+    # Extensions
+    extensions:
+      health_check:                        # Health Check Extension
+        endpoint: 0.0.0.0:13133            # Health Check Endpoint
 
-exporters:                        # Array of Exporters
-  debug:                          # Exporter Type
-    verbosity: detailed           # Enabled detailed debug output
+    # Receivers
+    receivers:
+      hostmetrics:                         # Host Metrics Receiver
+        collection_interval: 3600s         # Collection Interval (1hr)
+        scrapers:
+          cpu:                             # CPU Scraper
+      otlp:                                # OTLP Receiver
+        protocols:
+          http:                            # Configure HTTP protocol
+            endpoint: "0.0.0.0:4318"       # Endpoint to bind to
 
-processors:                       # Array of Processors
-  memory_limiter:                 # Limits memory usage by Collectors pipeline
-    check_interval: 2s            # Interval to check memory usage
-    limit_mib: 512                # Memory limit in MiB
-  resourcedetection:              # Processor Type
-    detectors: [system]           # Detect system resource information
-    override: true                # Overwrites existing attributes
-  resource/add_mode:              # Processor Type/Name
-    attributes:                   # Array of attributes and modifications
-    - action: insert              # Action is to insert a key
-      key: otelcol.service.mode   # Key name
-      value: "agent"              # Key value
+    # Exporters
+    exporters:
+      debug:                               # Debug Exporter
+        verbosity: detailed                # Detailed verbosity level
 
-###########################         This section controls what
-### Activation Section  ###         configurations will be used
-###########################         by this OpenTelemetry Collector
-service:                          # Services configured for this Collector
-  extensions:                     # Enabled extensions
-  - health_check
-  pipelines:                      # Array of configured pipelines
-    traces:
-      receivers:
-      - otlp                      # OTLP Receiver
-      processors:
-      - memory_limiter            # Memory Limiter processor
-      exporters:
-      - debug                     # Debug Exporter
-    metrics:
-      receivers:
-      - otlp                      # OTLP Receiver
-      processors:
-      - memory_limiter            # Memory Limiter processor
-      exporters:
-      - debug                     # Debug Exporter
-    logs:
-      receivers:
-      - otlp                      # OTLP Receiver
-      processors:
-      - memory_limiter            # Memory Limiter processor
-      exporters:
-      - debug                     # Debug Exporter
-```
+    # Processors
+    processors:
+      memory_limiter:                      # Limits memory usage
+        check_interval: 2s                 # Check interval
+        limit_mib: 512                     # Memory limit in MiB
+      resourcedetection:                   # Resource Detection Processor
+        detectors: [system]                # Detect system resources
+        override: true                     # Overwrites existing attributes
+      resource/add_mode:                   # Resource Processor
+        attributes:
+        - action: insert                   # Action to perform
+          key: otelcol.service.mode        # Key name
+          value: "agent"                   # Key value
 
-```text { title="Updated Directory Structure" }
-[WORKSHOP]
-└── 1-agent
-    └── agent.yaml  # OpenTelemetry Collector configuration file
-```
+    # Connectors
+    connectors:
+
+    # Service Section - Enabled Pipelines
+    service:
+      extensions:
+      - health_check                       # Health Check Extension
+      pipelines:
+        traces:
+          receivers:
+          - otlp                           # OTLP Receiver
+          processors:
+          - memory_limiter                 # Memory Limiter processor
+          - resourcedetection              # Add system attributes to the data
+          - resource/add_mode              # Add collector mode metadata
+          exporters:
+          - debug                          # Debug Exporter
+        metrics:
+          receivers:
+          - otlp
+          processors:
+          - memory_limiter
+          - resourcedetection
+          - resource/add_mode
+          exporters:
+          - debug
+        logs:
+          receivers:
+          - otlp
+          processors:
+          - memory_limiter
+          - resourcedetection
+          - resource/add_mode
+          exporters:
+          - debug
+    ```
+
+4. Your directory structure should now look like this:
+
+    ```text
+    .
+    └── agent.yaml  # OpenTelemetry Collector configuration file
+    ```
 
 {{% /notice %}}

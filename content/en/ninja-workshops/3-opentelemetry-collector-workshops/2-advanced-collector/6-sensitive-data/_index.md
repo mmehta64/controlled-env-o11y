@@ -2,7 +2,7 @@
 title: 6. Redacting Sensitive Data
 linkTitle: 6. Sensitive Data
 time: 10 minutes
-weight: 6
+weight: 8
 ---
 
 In this section, you'll learn how to configure the OpenTelemetry Collector to remove specific tags and redact sensitive data from telemetry spans. This is crucial for protecting sensitive information such as credit card numbers, personal data, or other security-related details that must be anonymized before being processed or exported.
@@ -16,15 +16,16 @@ We'll walk through configuring key processors in the OpenTelemetry Collector, in
 
 - Inside the `[WORKSHOP]` directory, create a new subdirectory named `6-sensitive-data`.
 - Next, copy `*.yaml` from the `5-dropping-spans` directory into `6-sensitive-data`.
-- Change **all** terminal windows to the `[WORKSHOP]/6-sensitive-data` directory.
+
+> [!IMPORTANT]
+> **Change _ALL_ terminal windows to the `[WORKSHOP]/6-sensitive-data` directory.**
 
 Your updated directory structure will now look like this:
 
 ```text { title="Updated Directory Structure" }
-[WORKSHOP]
-└── 6-sensitive-data
-    ├── agent.yaml
-    └── gateway.yaml
+.
+├── agent.yaml
+└── gateway.yaml
 ```
 
 {{% /notice %}}

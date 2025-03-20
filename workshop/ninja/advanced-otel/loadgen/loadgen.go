@@ -14,6 +14,27 @@ import (
 	"time"
 )
 
+// Global flag to ensure the first trace always uses "George Lucas"
+var firstAttempt = true
+
+// getRandomUserName selects "George Lucas" for the first trace, then randomizes
+func getRandomUserName() string {
+	userNames := []string{
+		"George Lucas",
+		"Darth Vader",
+		"Luke Skywalker",
+		"Frodo Baggins",
+		"Peter Jackson",
+		"Thorin Oakenshield",
+	}
+
+	if firstAttempt {
+		firstAttempt = false // Ensure future calls are random
+		return "George Lucas"
+	}
+	return userNames[rand.Intn(len(userNames)-1)+1] // Skip "George Lucas" after the first attempt
+}
+
 // Function to generate a random trace ID
 func generateTraceID() string {
 	return randomHex(16)
@@ -48,6 +69,7 @@ func getCurrentTime() int64 {
 
 // Function to send a base trace
 func sendBaseTrace(traceID, spanID string, startTime, endTime int64) {
+	randomUser := getRandomUserName() // Ensure first attempt is "George Lucas", then randomize
 	spanJSON := map[string]interface{}{
 		"resourceSpans": []interface{}{
 			map[string]interface{}{
@@ -97,7 +119,7 @@ func sendBaseTrace(traceID, spanID string, startTime, endTime int64) {
 									map[string]interface{}{
 										"key": "user.name",
 										"value": map[string]interface{}{
-											"stringValue": "George Lucas",
+											"stringValue": randomUser, // Uses "George Lucas" first, then random
 										},
 									},
 									map[string]interface{}{
@@ -355,19 +377,34 @@ func generateLogEntry(jsonOutput bool) string {
 }
 
 // Function to write logs to a file
-func writeLogs(jsonOutput bool) {
+func writeLogs(jsonOutput bool, count int) {
 	logFile := "quotes.log"
 	fmt.Printf("Writing logs to %s. Press Ctrl+C to stop.\n", logFile)
 
-	for {
-		logEntry := generateLogEntry(jsonOutput)
-		file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Fatalf("Failed to open log file: %v", err)
+	// If count is 0, run infinitely
+	if count == 0 {
+		for {
+			logEntry := generateLogEntry(jsonOutput)
+			file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				log.Fatalf("Failed to open log file: %v", err)
+			}
+			file.WriteString(logEntry + "\n")
+			file.Close()
+			time.Sleep(100 * time.Millisecond)
 		}
-		file.WriteString(logEntry + "\n")
-		file.Close()
-		time.Sleep(1 * time.Second)
+	} else {
+		// Otherwise, run for the specified count
+		for i := 0; i < count; i++ {
+			logEntry := generateLogEntry(jsonOutput)
+			file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				log.Fatalf("Failed to open log file: %v", err)
+			}
+			file.WriteString(logEntry + "\n")
+			file.Close()
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
 }
 
@@ -380,11 +417,12 @@ Options:
   -security   Send security traces
   -logs       Enable logging of random quotes to quotes.log
   -json       Output logs in JSON format (only applicable with -logs)
+  -count      Number of traces or logs to send (default: infinite)
   -h, --help  Display this help message
 
 Example:
-  loadgen -health -security   Send health and security traces
-  loadgen -logs -json         Write random quotes in JSON format to quotes.log`)
+  loadgen -health -security -count 10   Send 10 health and security traces
+  loadgen -logs -json -count 5          Write 5 random quotes in JSON format to quotes.log`)
 }
 
 func main() {
@@ -394,6 +432,7 @@ func main() {
 	securityFlag := flag.Bool("security", false, "Send security traces")
 	logsFlag := flag.Bool("logs", false, "Enable logging of random quotes to quotes.log")
 	jsonFlag := flag.Bool("json", false, "Output logs in JSON format (only applicable with -logs)")
+	countFlag := flag.Int("count", 0, "Number of traces or logs to send (default: infinite)")
 	helpFlag := flag.Bool("h", false, "Display help message")
 	helpFlagLong := flag.Bool("help", false, "Display help message")
 
@@ -407,31 +446,31 @@ func main() {
 
 	// Start logging if -logs flag is provided
 	if *logsFlag {
-		go writeLogs(*jsonFlag) // Run logs in a separate goroutine
+		go writeLogs(*jsonFlag, *countFlag) // Run logs in a separate goroutine
 	}
 
-	fmt.Println("Sending traces every 5 seconds. Use Ctrl-C to stop.")
+	fmt.Println("Sending traces. Use Ctrl-C to stop.")
 
-	for {
+	for i := 0; *countFlag == 0 || i < *countFlag; i++ {
 		traceID := generateTraceID()
 		spanID := generateSpanID()
 		currentTime := getCurrentTime()
 		endTime := currentTime + int64(time.Second)
 
-		if *baseFlag {
+		if *baseFlag && !*logsFlag {
 			sendBaseTrace(traceID, spanID, currentTime, endTime)
 		}
 
 		if *healthFlag {
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			sendHealthTrace(traceID, generateSpanID(), getCurrentTime(), getCurrentTime()+int64(time.Second))
 		}
 
 		if *securityFlag {
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			sendSecurityTrace(traceID, generateSpanID(), getCurrentTime(), getCurrentTime()+int64(time.Second))
 		}
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 }

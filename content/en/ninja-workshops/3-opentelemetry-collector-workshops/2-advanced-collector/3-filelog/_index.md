@@ -2,12 +2,12 @@
 title: 3. FileLog Setup
 linkTitle: 3. FileLog Setup
 time: 10 minutes
-weight: 3
+weight: 5
 ---
 
 The [**FileLog Receiver**](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md) in the OpenTelemetry Collector is used to ingest logs from files.
 
-It monitors specified files for new log entries and streams those logs into the Collector for further processing or exporting. It is useful for testing and development purposes.
+It monitors specified files for new log entries and streams those logs into the Collector for further processing or exporting. It is also useful for testing and development purposes.
 
 For this part of the workshop, the `loadgen` will generate logs using random quotes:
 
@@ -27,30 +27,22 @@ starWarsQuotes := []string{
 }
 ```
 
-The Filelog receiver will read these log lines and send them to the OpenTelemetry Collector.
+The **FileLog receiver** in the `agent` will read these log lines and send them to the `gateway`.
 
 {{% notice title="Exercise" style="green" icon="running" %}}
 
-- Move to the **Logs terminal** window.
-- Navigate to the `[WORKSHOP]` directory and create a new subdirectory named `3-filelog`.
+- In the **Logs terminal** window, change into the `[WORKSHOP]` directory and create a new subdirectory named `3-filelog`.
 - Next, copy `*.yaml` from `2-gateway` into `3-filelog`.
-- Change **all** terminal windows to the `[WORKSHOP]/3-filelog` directory.
 
-Your updated directory structure will now look like this:
-
-```text { title="Updated Directory Structure" }
-[WORKSHOP]
-└── 3-filelog
-    ├── agent.yaml
-    └── gateway.yaml
-```
+> [!IMPORTANT]
+> **Change _ALL_ terminal windows to the `[WORKSHOP]/3-filelog` directory.**
 
 Start the `loadgen` and this will begin writing lines to a file named `quotes.log`:
 
 {{% tabs %}}
 {{% tab title="Log Load Generator" %}}
 
-```bash { title="Start the Log Load Generator" }
+```bash
 ../loadgen -logs
 ```
 
@@ -63,4 +55,12 @@ Writing logs to quotes.log. Press Ctrl+C to stop.
 
 {{% /tab %}}
 {{% /tabs %}}
+
+```text { title="Updated Directory Structure" }
+.
+├── agent.yaml
+├── gateway.yaml
+└── quotes.yaml
+```
+
 {{% /notice %}}
