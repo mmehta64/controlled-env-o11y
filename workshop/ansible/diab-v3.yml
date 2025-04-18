@@ -167,6 +167,10 @@
           seconds: 5
         when: not wh_result.stat.exists
 
+      - name: Enable Chaos Mesh dashboard
+        command: kubectl apply -f /home/splunk/{{ diab_dir_name.files[0] }}v3/chaos-mesh/chaos-mesh-dashboard-lb.yaml
+        when: not wh_result.stat.exists
+
       - name: Save Demo-in-a-Box configuration
         uri:
           url: "http://localhost:8082/saveConfig"
